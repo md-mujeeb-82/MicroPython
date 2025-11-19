@@ -15,13 +15,15 @@ def file_exists(filename):
     
 if not file_exists('data.txt'):
     f = open('data.txt', 'w')
-    f.write('mohammad.mujeeb@gmail.com,marghoob.hasan@gmail.com')
+    data = 'mohammad.mujeeb@gmail.com,marghoob.hasan@gmail.com'
+    f.write(data)
     f.close()
+    toEmailAddresses = data.split(",")
 else:
     f = open('data.txt', 'r')
     toEmailAddresses = f.read().split(",")
-    print(toEmailAddresses)
     f.close()
+print(toEmailAddresses)
     
 # Email Configuration
 SENDER_EMAIL = "mujeeb.automation@gmail.com"
