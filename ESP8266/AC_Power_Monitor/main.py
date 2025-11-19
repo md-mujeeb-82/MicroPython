@@ -12,18 +12,29 @@ def file_exists(filename):
         return True
     except OSError:
         return False
-    
-if not file_exists('data.txt'):
-    f = open('data.txt', 'w')
-    data = 'mohammad.mujeeb@gmail.com,marghoob.hasan@gmail.com'
-    f.write(data)
-    f.close()
-    toEmailAddresses = data.split(",")
-else:
+
+# Default EMail addresses
+toEmailAddresses = 'mohammad.mujeeb@gmail.com,marghoob.hasan@gmail.com'.split(",")
+
+def readDataFile():
+    global toEmailAddresses
     f = open('data.txt', 'r')
     toEmailAddresses = f.read().split(",")
     f.close()
-print(toEmailAddresses)
+
+def writeDataFile():
+    global toEmailAddresses
+    f = open('data.txt', 'w')
+    f.write(",".join(toEmailAddresses))
+    f.close()
+    
+if not file_exists('data.txt'):
+    print("File does not exist")
+    writeDataFile()
+else:
+    readDataFile()
+    
+print("List of Recipient EMail Addresses: ", toEmailAddresses)
     
 # Email Configuration
 SENDER_EMAIL = "mujeeb.automation@gmail.com"
@@ -90,6 +101,7 @@ def send_email(subject, body):
     smtp = umail.SMTP('smtp.gmail.com', 465, ssl=True) # Gmail's SSL port
     smtp.login(SENDER_EMAIL, APP_PASSWORD)
     
+    global toEmailAddresses
     for email in toEmailAddresses:
         # Send the email
         print('Sending email to ' + email)
@@ -141,18 +153,49 @@ def pollingCallback(timer):
 timer = machine.Timer(3)
 timer.init(mode=machine.Timer.PERIODIC, period=20, callback=pollingCallback)
 
+def handleFormSubmit(client_socket):
+    request = client_socket.recv(1024).decode('utf-8')
+    # Example request: GET /?name=John&age=30 HTTP/1.1
+    
+    global toEmailAddresses
+
+    # Find the start of the query string
+    try:
+        path_start = request.index('GET /') + 5
+        path_end = request.index(' ', path_start)
+        full_path = request[path_start:path_end]
+
+        if '?' in full_path:
+            path, query_string = full_path.split('?', 1)
+            
+            parameters = {}
+            for param_pair in query_string.split('&'):
+                if '=' in param_pair:
+                    key, value = param_pair.split('=', 1)
+                    parameters[key] = value
+            
+            emailsString = parameters["emails"].replace("%40","@").replace("%2C",",").replace("+","")
+            emails = emailsString.split(",")
+            if(len(emails) >= 1):
+                toEmailAddresses = emails
+                print("List of Recipient EMail Addresses: ", toEmailAddresses)
+                # Save email addresses to File
+                writeDataFile()
+        else:
+            print("No GET parameters found.")
+
+    except ValueError:
+        print("Invalid request or no GET path found.")
+
+    # Send a simple response
+    value = ",".join(toEmailAddresses)
+    response = html.replace('%s', value)
+    client_socket.send('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
+    client_socket.send(response)
+
 # Web Server
 while True:
     cl, addr = s.accept()
     print('client connected from', addr)
-    cl_file = cl.makefile('rwb', 0)
-    while True:
-        line = cl_file.readline()
-        if not line or line == b'\r\n':
-            break
-    value = ",".join(toEmailAddresses)
-    response = html.replace('%s', value)
-    cl.send('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
-    cl.send(response)
+    handleFormSubmit(cl)
     cl.close()
-
