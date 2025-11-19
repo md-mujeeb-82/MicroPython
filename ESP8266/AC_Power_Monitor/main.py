@@ -73,13 +73,14 @@ html = """<!DOCTYPE html>
         </style>
     </head>
     <body>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <center>
             <h1>AC Power Monitor</h1>
             <table> <tr><th><center>Receiver's Email Address(es)</center></th></tr>
             <tr>
                 <td>
 					<form method=GET action="/">
-						<input type="text" value="%s" name="emails" length="300" size="200">
+						<input type="text" value="%s" name="emails" length="300" size="100">
 						<br><br>
 						<input type="Submit" value=" Save ">
 					</form>
