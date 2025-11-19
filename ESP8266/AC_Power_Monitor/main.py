@@ -61,30 +61,44 @@ html = """<!DOCTYPE html>
         <style>
             table {
               width: 100%;
-              border-collapse: collapse; /* Optional: collapses borders between cells */
+              height: 70%;
+              border: 0px solid black; /* Optional: collapses borders between cells */
             }
 
             th, td {
-              border: 1px solid black;
+              border: 0px solid black;
               padding: 10px; /* Adds 10px padding inside each cell */
-              text-align: left; /* Optional: aligns text to the left */
+              text-align: center; /* Optional: aligns text to the left */
             }
         </style>
     </head>
-    <body> <h1>AC Power Monitor</h1>
-        <table> <tr><th>Receiver's Email Address(es)</th></tr>
-        <tr>
-            <td>
-                <center>
-                    <form method=GET action="/">
-                        <input type="text" value="%s" name="emails" length="300" size="200">
-                        <br><br>
-                        <input type="Submit" value=" Save ">
-                    </form>
-                </center>
-            </td>
-        </tr>
-        </table>
+    <body>
+        <center>
+            <h1>AC Power Monitor</h1>
+            <table> <tr><th><center>Receiver's Email Address(es)</center></th></tr>
+            <tr>
+                <td>
+					<form method=GET action="/">
+						<input type="text" value="%s" name="emails" length="300" size="200">
+						<br><br>
+						<input type="Submit" value=" Save ">
+					</form>
+                </td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td><font face="Arial">For any help, contact: Mujeeb Mohammad (mohammad.mujeeb@gmail.com) : +91 9880506766</font></td>
+            </tr>
+            </table>
+        </center>
     </body>
 </html>
 """
@@ -191,11 +205,13 @@ def handleFormSubmit(client_socket):
     value = ",".join(toEmailAddresses)
     response = html.replace('%s', value)
     client_socket.send('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
-    client_socket.send(response)
+    client_socket.sendall(response)
+    cl.close()
 
 # Web Server
 while True:
     cl, addr = s.accept()
     print('client connected from', addr)
     handleFormSubmit(cl)
-    cl.close()
+
+
