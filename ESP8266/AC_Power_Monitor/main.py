@@ -75,13 +75,13 @@ html = """<!DOCTYPE html>
     </body>
 </html>
 """
-# import socket
-# addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
-# 
-# s = socket.socket()
-# s.bind(addr)
-# s.listen(1)
-# print('listening on', addr)
+import socket
+addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
+
+s = socket.socket()
+s.bind(addr)
+s.listen(1)
+print('listening on', addr)
 
 # Function to Send an email
 def send_email(subject, body):
@@ -106,22 +106,19 @@ def get_formatted_time():
 # Create an ADC object for the A0 pin
 adc = machine.ADC(0)
 isPowerGone = True
-lastTimePoll = time.ticks_ms()
 highestValue = -1
-sampleCount = 0;
+sampleCount = 0
 
-while True:
-    currentTime = time.ticks_ms()
+def pollingCallback(timer):
+    global analog_value, adc, highestValue, sampleCount, isPowerGone
     
-    if (currentTime - lastTimePoll) > 20:
-        # Read the analog value
-        analog_value = adc.read()
+    # Read the analog value
+    analog_value = adc.read()
         
-        if highestValue < analog_value:
-            highestValue = analog_value
+    if highestValue < analog_value:
+        highestValue = analog_value
         
-        sampleCount = sampleCount + 1
-        lastTimePoll = currentTime
+    sampleCount = sampleCount + 1
         
     if sampleCount  > 50:
         if not isPowerGone and highestValue <= 900:
@@ -138,17 +135,22 @@ while True:
             
         highestValue = -1
         sampleCount = 0
-        
-    # Web Server
-#     cl, addr = s.accept()
-#     print('client connected from', addr)
-#     cl_file = cl.makefile('rwb', 0)
-#     while True:
-#         line = cl_file.readline()
-#         if not line or line == b'\r\n':
-#             break
-#     value = ",".join(toEmailAddresses)
-#     response = html.replace('%s', value)
-#     cl.send('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
-#     cl.send(response)
-#     cl.close()
+
+timer = machine.Timer(3)
+timer.init(mode=machine.Timer.PERIODIC, period=20, callback=pollingCallback)
+
+# Web Server
+while True:
+    cl, addr = s.accept()
+    print('client connected from', addr)
+    cl_file = cl.makefile('rwb', 0)
+    while True:
+        line = cl_file.readline()
+        if not line or line == b'\r\n':
+            break
+    value = ",".join(toEmailAddresses)
+    response = html.replace('%s', value)
+    cl.send('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
+    cl.send(response)
+    cl.close()
+
