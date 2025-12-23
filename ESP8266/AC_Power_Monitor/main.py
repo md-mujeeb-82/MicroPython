@@ -14,7 +14,7 @@ def file_exists(filename):
         return False
 
 # Default EMail addresses
-toEmailAddresses = 'mohammad.mujeeb@gmail.com,marghoob.hasan@gmail.com'.split(",")
+toEmailAddresses = 'xx@gmail.com,yy@gmail.com'.split(",")
 
 def readDataFile():
     global toEmailAddresses
@@ -37,9 +37,9 @@ else:
 print("List of Recipient EMail Addresses: ", toEmailAddresses)
     
 # Email Configuration
-SENDER_EMAIL = "mujeeb.automation@gmail.com"
+SENDER_EMAIL = "xyz@gmail.com"
 SENDER_NAME = "Informer"
-APP_PASSWORD = "edwiliwuwfyqrufq"  # The 16-character app password
+APP_PASSWORD = "xxxxxxxxxxxx"  # The 16-character app password
 SMTP_SERVER = "smtp.gmail.com"  # Or your email provider's SMTP server
 SMTP_PORT = 587  # Or your email provider's SMTP port (e.g., 465 for SSL)
 
@@ -48,7 +48,7 @@ sta_if = network.WLAN(network.WLAN.IF_STA)
 if not sta_if.isconnected():
     print('connecting to network...')
     sta_if.active(True)
-    sta_if.connect('Ahmads', '03312018')
+    sta_if.connect('xxxxxx', 'xxxxxxxx')
     while not sta_if.isconnected():
         pass
 print('network config:', sta_if.ipconfig('addr4'))
